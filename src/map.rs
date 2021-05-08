@@ -13,7 +13,7 @@ pub struct Map {
     pub tiles: Vec<TileType>,
 }
 
-fn map_index(x: i32, y: i32) -> usize {
+pub fn map_index(x: i32, y: i32) -> usize {
     ((y * SCREEN_WIDTH) + x) as usize
 }
 
@@ -34,7 +34,7 @@ impl Map {
                         ctx.set(x, y, GRAY12, BLACK, to_cp437('.'));
                     }
                     TileType::Wall => {
-                        ctx.set(x, y, GREEN, BLACK, to_cp437('#'));
+                        ctx.set(x, y, GREEN4, BLACK, to_cp437('#'));
                     }
                 }
             }
@@ -50,7 +50,7 @@ impl Map {
     }
 
     pub fn try_map_index(&self, point: Point) -> Option<usize> {
-        if (!self.in_bounds(point)) {
+        if !self.in_bounds(point) {
             None
         } else {
             Some(map_index(point.x, point.y))
