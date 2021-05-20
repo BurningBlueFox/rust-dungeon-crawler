@@ -3,12 +3,16 @@ use crate::prelude::*;
 #[system]
 #[read_component(Point)]
 #[read_component(Player)]
+#[read_component(Enemy)]
+#[write_component(Health)]
 pub fn player_input(
     ecs: &mut SubWorld,
     commands: &mut CommandBuffer,
     #[resource] key: &Option<VirtualKeyCode>,
     #[resource] turn_state: &mut TurnState,
 ) {
+    let mut waited = false;
+
     if let Some(key) = key {
         let delta = match key {
             VirtualKeyCode::Left => Point::new(-1, 0),
@@ -16,13 +20,13 @@ pub fn player_input(
             VirtualKeyCode::Up => Point::new(0, -1),
             VirtualKeyCode::Down => Point::new(0, 1),
             VirtualKeyCode::Space => {
-                *turn_state = TurnState::PlayerTurn;
-                return;
+                waited = true;
+                Point::new(0, 0)
             }
             _ => Point::new(0, 0),
         };
 
-        if delta.x != 0 || delta.y != 0 {
+        if delta.x != 0 || delta.y != 0 || waited {
             let mut hit_something = false;
             let mut players = <(Entity, &Point)>::query().filter(component::<Player>());
 
@@ -30,6 +34,19 @@ pub fn player_input(
                 .iter(ecs)
                 .find_map(|(entity, pos)| Some((*entity, *pos + delta)))
                 .unwrap();
+
+            if waited {
+                if let Ok(mut health) = ecs
+                    .entry_mut(player_entity)
+                    .unwrap()
+                    .get_component_mut::<Health>()
+                {
+                    health.current = i32::min(health.max, health.current + 1);
+                }
+
+                *turn_state = TurnState::PlayerTurn;
+                return;
+            }
 
             let mut enemies = <(Entity, &Point)>::query().filter(component::<Enemy>());
 
