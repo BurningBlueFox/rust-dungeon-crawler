@@ -1,4 +1,5 @@
 use crate::prelude::*;
+use std::cmp::Ordering;
 
 #[system]
 #[read_component(Point)]
@@ -26,7 +27,15 @@ pub fn tooltips(ecs: &SubWorld, #[resource] mouse_pos: &Point, #[resource] camer
                     name.0.clone()
                 };
 
-            draw_batch.print(screen_pos, &display);
+            let print_offset = match screen_pos.y.cmp(&5) {
+                Ordering::Less => 6,
+                _ => -2,
+            };
+
+            draw_batch.print(
+                Point::new(screen_pos.x, screen_pos.y + print_offset),
+                &display,
+            );
         });
     draw_batch.submit(10100).expect("Batch error");
 }
