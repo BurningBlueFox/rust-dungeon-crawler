@@ -23,6 +23,8 @@ pub fn build_input_scheduler() -> Schedule {
 
 pub fn build_player_scheduler() -> Schedule {
     Schedule::builder()
+        .add_system(combat::combat_system())
+        .flush()
         .add_system(movement::movement_system())
         .flush()
         .add_system(map_render::map_render_system())
@@ -36,6 +38,8 @@ pub fn build_player_scheduler() -> Schedule {
 pub fn build_npcs_scheduler() -> Schedule {
     Schedule::builder()
         .add_system(random_move::random_move_system())
+        .flush()
+        .add_system(combat::combat_system())
         .flush()
         .add_system(movement::movement_system())
         .flush()
